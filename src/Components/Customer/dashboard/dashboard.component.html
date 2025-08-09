@@ -1,0 +1,313 @@
+<div class="dashboard-container">
+  <!-- Header Section -->
+  <div class="header-banner">
+    <div class="welcome-section">
+      <h1 class="welcome-text">Welcome back, John Smith!</h1>
+      <p class="subtitle">Manage your vehicles and services</p>
+    </div>
+    <div class="stats-section">
+      <div class="stat-item">
+        <span class="stat-number">24</span>
+        <span class="stat-label">Services</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">1250</span>
+        <span class="stat-label">Points</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" [class.active]="activeTab === 'dashboard'" (click)="setActiveTab('dashboard')">
+      <i class="fas fa-tachometer-alt"></i>
+      Dashboard
+    </button>
+    <button class="nav-tab" [class.active]="activeTab === 'vehicles'" (click)="setActiveTab('vehicles')">
+      <i class="fas fa-car"></i>
+      My Vehicles
+    </button>
+    <button class="nav-tab" [class.active]="activeTab === 'history'" (click)="setActiveTab('history')">
+      <i class="fas fa-history"></i>
+      Service History
+    </button>
+    <button class="nav-tab" [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')">
+      <i class="fas fa-user-cog"></i>
+      Profile
+    </button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-content" *ngIf="activeTab === 'dashboard'">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="card-icon services-icon">
+          <i class="fas fa-tools"></i>
+        </div>
+        <div class="card-content">
+          <h3>Total Services</h3>
+          <span class="stat-value">24</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="card-icon money-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="card-content">
+          <h3>Money Saved</h3>
+          <span class="stat-value">$450</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="card-icon loyalty-icon">
+          <i class="fas fa-award"></i>
+        </div>
+        <div class="card-content">
+          <h3>Loyalty Points</h3>
+          <span class="stat-value">1250</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="card-icon member-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="card-content">
+          <h3>Member Since</h3>
+          <span class="stat-value">January<br>2023</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming Services Section -->
+    <div class="upcoming-services">
+      <h2>Upcoming Services</h2>
+      <div class="service-cards" *ngIf="upcomingServices.length > 0">
+        <div class="service-card" *ngFor="let service of upcomingServices">
+          <div class="service-date">
+            <span class="day">{{ service.day }}</span>
+            <span class="month">{{ service.month }}</span>
+          </div>
+          <div class="service-details">
+            <h4>{{ service.title }}</h4>
+            <p>{{ service.description }}</p>
+            <div class="service-meta">
+              <span class="vehicle">{{ service.vehicle }}</span>
+              <span class="time">{{ service.time }}</span>
+            </div>
+          </div>
+          <div class="service-status">
+            <span class="status" [class]="service.status">{{ service.statusText }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="no-services" *ngIf="upcomingServices.length === 0">
+        <i class="fas fa-calendar-times"></i>
+        <p>No upcoming services scheduled</p>
+      </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      <div class="action-cards">
+        <div class="action-card book-service" (click)="openAddServiceModal()">
+          <div class="action-icon">
+            <i class="fas fa-plus"></i>
+          </div>
+          <div class="action-content">
+            <h3>Book New Service</h3>
+            <p>Schedule your next car service</p>
+          </div>
+        </div>
+
+        <a href="tel:+12345678900" style="text-decoration: none; color: inherit;">
+          <div class="action-card contact-support">
+            <div class="action-icon">
+              <i class="fas fa-comments"></i>
+            </div>
+            <div class="action-content">
+              <h3>Contact Support</h3>
+              <p>Get help with your services</p>
+            </div>
+          </div>
+        </a>
+
+        <a href="assets/PDF/INVOICE.pdf" download="Invoice_MohamedReda.pdf" style="text-decoration: none; color: inherit;">
+          <div class="action-card download-invoice" style="cursor: pointer;">
+            <div class="action-icon">
+              <i class="fas fa-download"></i>
+            </div>
+            <div class="action-content">
+              <h3>Download Invoice</h3>
+              <p>Get your service receipts</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Add Service Modal -->
+    <div class="modal-overlay" *ngIf="showAddServiceModal" (click)="closeAddServiceModal()" (keydown.escape)="closeAddServiceModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Add New Service</h3>
+          <button class="close-btn" (click)="closeAddServiceModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form class="service-form" [formGroup]="addServiceForm" (ngSubmit)="addNewService()">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="serviceTitle">Service Title</label>
+              <input type="text" id="serviceTitle" name="serviceTitle" formControlName="title" required placeholder="e.g., Oil Change & Filter">
+              <div class="error-message" *ngIf="getFieldError('title')">
+                {{ getFieldError('title') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="servicePrice">Price ($)</label>
+              <input type="number" id="servicePrice" name="servicePrice" formControlName="price" required placeholder="0.00">
+              <div class="error-message" *ngIf="getFieldError('price')">
+                {{ getFieldError('price') }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="serviceDescription">Description</label>
+              <input type="text" id="serviceDescription" name="serviceDescription" formControlName="description" required placeholder="e.g., Regular maintenance service">
+              <div class="error-message" *ngIf="getFieldError('description')">
+                {{ getFieldError('description') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="serviceType">Service Type</label>
+              <select id="serviceType" name="serviceType" formControlName="serviceType" required>
+                <option value="General Service">General Service</option>
+                <option value="Oil Change">Oil Change</option>
+                <option value="Brake Service">Brake Service</option>
+                <option value="Tire Service">Tire Service</option>
+                <option value="Engine Repair">Engine Repair</option>
+                <option value="AC Repair">AC Repair</option>
+                <option value="Electrical">Electrical</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="technician">Technician</label>
+              <input type="text" id="technician" name="technician" formControlName="technician" required placeholder="e.g., John Smith">
+              <div class="error-message" *ngIf="getFieldError('technician')">
+                {{ getFieldError('technician') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="vehicle">Vehicle</label>
+              <input type="text" id="vehicle" name="vehicle" formControlName="vehicle" required placeholder="e.g., Toyota Camry">
+              <div class="error-message" *ngIf="getFieldError('vehicle')">
+                {{ getFieldError('vehicle') }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="serviceDate">Service Date</label>
+              <input 
+                type="date" 
+                id="serviceDate" 
+                name="serviceDate" 
+                formControlName="date" 
+                required
+                [min]="getTodayDate()"
+                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 0.75rem 1rem; color: var(--light); font-size: 1rem;"
+              >
+              <div class="error-message" *ngIf="getFieldError('date')">
+                {{ getFieldError('date') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="location">Location</label>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input 
+                  type="text" 
+                  id="location" 
+                  name="location" 
+                  formControlName="location" 
+                  required 
+                  placeholder="Enter location or click to get your current location"
+                  style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 0.75rem 1rem; color: var(--light); font-size: 1rem;"
+                />
+                <button 
+                  type="button" 
+                  (click)="getCurrentLocation()" 
+                  [disabled]="isGettingLocation"
+                  style="background: var(--primary-color); color: white; border: none; border-radius: 8px; padding: 0.75rem; cursor: pointer; transition: all 0.3s ease; min-width: 100px;"
+                  title="Get current location"                >
+                  <i class="fas fa-location-arrow" *ngIf="!isGettingLocation"></i>
+                  <i class="fas fa-spinner fa-spin" *ngIf="isGettingLocation"></i>
+                  {{ isGettingLocation ? 'Loading...' : 'My Location' }}
+                </button>
+              </div>
+              <div class="error-message" *ngIf="getFieldError('location')">
+                {{ getFieldError('location') }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rating">Expected Rating</label>
+              <select id="rating" name="rating" formControlName="rating" required>
+                <option value="5">5 Stars - Excellent</option>
+                <option value="4">4 Stars - Very Good</option>
+                <option value="3">3 Stars - Good</option>
+                <option value="2">2 Stars - Fair</option>
+                <option value="1">1 Star - Poor</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div class="error-message global-error" *ngIf="errorMessage">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ errorMessage }}
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeAddServiceModal()">Cancel</button>
+            <button type="submit" class="btn btn-danger" [disabled]="addServiceForm.invalid || isLoading">
+              <span *ngIf="!isLoading">
+                <i class="fas fa-plus"></i>
+                Add Service
+              </span>
+              <span *ngIf="isLoading" class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                Adding Service...
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Other Tab Contents -->
+  <div class="tab-content" *ngIf="activeTab === 'vehicles'">
+    <app-vehicles></app-vehicles>
+  </div>
+
+  <div class="tab-content" *ngIf="activeTab === 'history'">
+    <app-service-history></app-service-history>
+  </div>
+
+  <div class="tab-content" *ngIf="activeTab === 'profile'">
+    <app-customer-profile></app-customer-profile>
+  </div>
+</div>
